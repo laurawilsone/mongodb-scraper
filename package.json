@@ -18,11 +18,14 @@
   },
   "homepage": "https://github.com/laurawilsone/mongodb-scraper#readme",
   "dependencies": {
+    "article": "^1.1.2",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
     "mongoose": "^5.2.2",
-    "request": "^2.87.0"
+    "note": "^1.2.1",
+    "request": "^2.87.0",
+    "scrape": "^0.2.3"
   }
 }

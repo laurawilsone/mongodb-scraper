@@ -1,65 +1,42 @@
+
 // Dependencies
-var express = require("express");
-var bodyParser = require("body-parser");
-var mongoose = require("mongoose");
-var exphbs = require("express-handlebars");
+const express = require("express");
+const bodyParser = require("body-parser"); //JSON response
+const mongoose = require("mongoose"); //Mongo object modelling 
+const request = require("request"); //Makes http calls
+const cheerio = require("cheerio"); //Scraper
 
-var Note = require("./models/Note.js");
-var Article = require("./models/Article.js");
+// Require all models
+const db = require("./models");
 
-mongoose.Promise = Promise;
-
+// Port configuration for local/Heroku
+const PORT = process.env.PORT || process.argv[2] || 8080;
 
 // Initialize Express
-var app = express();
+const app = express();
 
-// Use body Parser with our app
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
+// Use body-parser for handling form submissions
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Mkae public a static dir
-app.use(express.static(process.cwd() + "/public"));
-
-// Database configuration with mongoose
-var databaseUri = "mongod://localhostmongoosearticles";
-
-if (process.env.MONGODB_URI) {
-    mongoose.connect(process.env.MONGO_URI);
-} else {
-    mongoose.connect(databaseUri);
-}
-
-var db = mongoose.connection;
-
-db.on("error", function(error) {
-    console.log("Mongoose Error: ", error);
-});
-
-// set engine and default for handlebars
+// Handlebars
+const exphbs = require("express-handlebars");
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
-// Import routes and give the server access to them
-var router = express.Router();
-
-// Require routes file pass router object
-require("./config/routes")(router);
-
-// Have every request go through router middlewar
+// Use express.static to serve the public folder as a static directory
+app.use(express.static("public"));
+// Controllers
+const router = require("./controllers/api.js");
 app.use(router);
+// Connect to the Mongo DB
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
-//set port
-var port = process.env.PORT || 8080;
+// Set mongoose to leverage built in JavaScript ES6 Promises
+// Connect to the Mongo DB
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI);
 
-//setup listener
-app.listen(port, function() {
-    console.log("app running on port " + port);
+// Start the server
+app.listen(PORT, function () {
+    console.log(`This application is running on port: ${PORT}`);
 });
-
-
-
-
-
-
-

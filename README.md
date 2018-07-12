@@ -20,10 +20,10 @@ To use this application:
     node server.js
 
 # NPM Packages
-*express
-*express-handlebars
-*mongoose
-*body-parser
-*cheerio
-*request
+..*express
+..*express-handlebars
+..*mongoose
+..*body-parser
+..*cheerio
+..*request
 

@@ -9,13 +9,21 @@ To use this application:
 
 2. Next, clone this repo to your local machine:
 
-git clone git@github.com:laurawilsone/mongodb-scraper.git
+    git clone git@github.com:laurawilsone/mongodb-scraper.git
 
 3. Open the repo and execute the following in the bash terminal. Doing so should install the application's dependencies:
 
-npm i
+    npm i
 
 4. Run the application from the command line:
 
-node server.js
+    node server.js
+
+# NPM Packages
+*express
+*express-handlebars
+*mongoose
+*body-parser
+*cheerio
+*request
 

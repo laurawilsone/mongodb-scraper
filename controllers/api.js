@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../models");
+const Article = require("../models/Article");
+const Note = require("../models/Note");
 const request = require("request"); //Makes http calls
 const cheerio = require("cheerio");
 
@@ -37,7 +38,7 @@ request("http://www.nytimes.com/", (error, response, body) => {
                 || 'No byline available'
 
             if (result.title && result.link && result.summary) {
-                db.Article.create(result)
+                Article.create(result)
                     .then(function (dbArticle) {
                         count++;
                     })
@@ -57,7 +58,7 @@ request("http://www.nytimes.com/", (error, response, body) => {
 });
 
 router.get("/", (req, res) => {
-    db.Article.find({})
+    Article.find({})
         .then(function (dbArticle) {
             // If we were able to successfully find Articles, send them back to the client
             const retrievedArticles = dbArticle;
@@ -74,7 +75,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/saved", (req, res) => {
-    db.Article.find({isSaved: true})
+    Article.find({isSaved: true})
         .then(function (retrievedArticles) {
             // If we were able to successfully find Articles, send them back to the client
             let hbsObject;
@@ -92,7 +93,7 @@ router.get("/saved", (req, res) => {
 // Route for getting all Articles from the db
 router.get("/articles", function (req, res) {
     // Grab every document in the Articles collection
-    db.Article.find({})
+    Article.find({})
         .then(function (dbArticle) {
             // If we were able to successfully find Articles, send them back to the client
             res.json(dbArticle);
@@ -104,7 +105,7 @@ router.get("/articles", function (req, res) {
 });
 
 router.put("/save/:id", function (req, res) {
-    db.Article.findOneAndUpdate({ _id: req.params.id }, { isSaved: true })
+    Article.findOneAndUpdate({ _id: req.params.id }, { isSaved: true })
         .then(function (data) {
             // If we were able to successfully find Articles, send them back to the client
             res.json(data);
@@ -116,7 +117,7 @@ router.put("/save/:id", function (req, res) {
 });
 
 router.put("/remove/:id", function (req, res) {
-    db.Article.findOneAndUpdate({ _id: req.params.id }, { isSaved: false })
+    Article.findOneAndUpdate({ _id: req.params.id }, { isSaved: false })
         .then(function (data) {
             // If we were able to successfully find Articles, send them back to the client
             res.json(data)
@@ -130,7 +131,7 @@ router.put("/remove/:id", function (req, res) {
 // Route for grabbing a specific Article by id, populate it with it's note
 router.get("/articles/:id", function (req, res) {
     // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-    db.Article.find({ _id: req.params.id })
+    Article.find({ _id: req.params.id })
         // ..and populate all of the notes associated with it
         .populate({
             path: 'note',
@@ -149,12 +150,12 @@ router.get("/articles/:id", function (req, res) {
 // Route for saving/updating an Article's associated Note
 router.post("/note/:id", function (req, res) {
     // Create a new note and pass the req.body to the entry
-    db.Note.create(req.body)
+    Note.create(req.body)
         .then(function (dbNote) {
             // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
             // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
             // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
-            return db.Article.findOneAndUpdate({ _id: req.params.id }, {$push: { note: dbNote._id }}, { new: true });
+            return Article.findOneAndUpdate({ _id: req.params.id }, {$push: { note: dbNote._id }}, { new: true });
         })
         .then(function (dbArticle) {
             // If we were able to successfully update an Article, send it back to the client
@@ -168,10 +169,10 @@ router.post("/note/:id", function (req, res) {
 
 router.delete("/note/:id", function (req, res) {
     // Create a new note and pass the req.body to the entry
-    db.Note.findByIdAndRemove({ _id: req.params.id })
+    Note.findByIdAndRemove({ _id: req.params.id })
         .then(function (dbNote) {
 
-            return db.Article.findOneAndUpdate({ note: req.params.id }, { $pullAll: [{ note: req.params.id }]});
+            return Article.findOneAndUpdate({ note: req.params.id }, { $pullAll: [{ note: req.params.id }]});
         })
         .then(function (dbArticle) {
             // If we were able to successfully update an Article, send it back to the client

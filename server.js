@@ -7,7 +7,7 @@ const request = require("request"); //Makes http calls
 const cheerio = require("cheerio"); //Scraper
 
 // Require all models
-const db = require("./models");
+const db = require("../models");
 
 // Port configuration for local/Heroku
 const PORT = process.env.PORT || process.argv[2] || 8080;
